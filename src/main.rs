@@ -4,10 +4,10 @@ use std::fs::{read_to_string, write, OpenOptions};
 use std::io::Write;
 
 static HELP_MESSAGE: &'static str = r#"Available commands:
-    help                            Show the help.
-    add <list_name> <site_list>     Add sites to a proxy list. site_list is a comma separated list of urls or domains to add to the list.
-    complete <list_name>            Move all sites in that list to the "allowed" list
-    cat <list_name>                 Print out the given list"#;
+    help                                    Show the help.
+    add <list_name> <site_list>             Add sites to a proxy list. site_list is a comma separated list of urls or domains to add to the list.
+    complete <list_name>                    Move all sites in that list to the "allowed" list
+    cat <list_name> [pending|allowed]       Print out the given pending list or completed list"#;
 
 fn main() {
     let mut args = env::args();
@@ -101,8 +101,30 @@ fn subcommand_complete(mut args: env::Args) {
         .expect(&format!("could not open proxy list: {}", &list_paths.pending));
 }
 
+enum ListType {
+    Pending,
+    Allowed,
+}
+
 fn subcommand_cat(mut args: env::Args) {
     let list_paths = get_list_paths(&mut args);
 
-    println!("{}", read_to_string(&list_paths.pending).expect(&format!("could not read proxy list: {}", list_paths.pending)));
+    let mut list_type_arg = String::new();
+    if let Some(list) = args.next() {
+        list_type_arg = list
+    }
+    let list_type = match list_type_arg.as_str() {
+        "allowed" => ListType::Allowed,
+        "pending" => ListType::Pending,
+        "" => ListType::Pending,
+        x => {
+            eprintln!("{} is not a valid list type", x);
+            exit(1);
+        }
+    };
+
+    match list_type {
+        ListType::Pending => println!("{}", read_to_string(&list_paths.pending).expect(&format!("could not read proxy list: {}", list_paths.pending))),
+        ListType::Allowed => println!("{}", read_to_string(&list_paths.allowed).expect(&format!("could not read proxy list: {}", list_paths.allowed))),
+    }
 }
