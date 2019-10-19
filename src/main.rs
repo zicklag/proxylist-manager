@@ -79,6 +79,8 @@ fn subcommand_add(mut args: env::Args) {
         .expect(&format!("could not open proxy list: {}", &list_path));
 
     list_file.write_all(new_sites.as_bytes()).expect(&format!("Could not write to proxy list: {}", list_path));
+
+    println!("Added pending: {}", &new_sites);
 }
 
 fn subcommand_complete(mut args: env::Args) {
@@ -99,6 +101,8 @@ fn subcommand_complete(mut args: env::Args) {
         .truncate(true)
         .open(&list_paths.pending)
         .expect(&format!("could not open proxy list: {}", &list_paths.pending));
+
+    println!("Added alowed: {}", &pending_list);
 }
 
 enum ListType {
