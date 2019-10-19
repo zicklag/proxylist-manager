@@ -1,13 +1,13 @@
 use std::env::{self, var};
 use std::process::exit;
-use std::fs::{read_to_string, write, OpenOptions};
+use std::fs::{read_to_string, OpenOptions};
 use std::io::Write;
 
 static HELP_MESSAGE: &'static str = r#"Available commands:
     help                                    Show the help.
     add <list_name> <site_list>             Add sites to a proxy list. site_list is a comma separated list of urls or domains to add to the list.
-    complete <list_name>                    Move all sites in that list to the "allowed" list
-    cat <list_name> [pending|allowed]       Print out the given pending list or completed list"#;
+    allow <list_name>                       Move all sites in that list to the "allowed" list
+    cat <list_name> [pending|allowed]       Print out the given pending list or allowed list"#;
 
 fn main() {
     let mut args = env::args();
@@ -24,7 +24,7 @@ fn main() {
     match subcommand.as_str() {
         "help" => println!("{}", HELP_MESSAGE),
         "add" => subcommand_add(args),
-        "complete" => subcommand_complete(args),
+        "allow" => subcommand_allow(args),
         "cat" => subcommand_cat(args),
         other_cmd => {
             eprintln!(r#"unrecognized command "{}""#, other_cmd);
@@ -83,7 +83,7 @@ fn subcommand_add(mut args: env::Args) {
     println!("Added pending: {}", &new_sites);
 }
 
-fn subcommand_complete(mut args: env::Args) {
+fn subcommand_allow(mut args: env::Args) {
     let list_paths = get_list_paths(&mut args);
 
     let mut allowed_list = OpenOptions::new()
